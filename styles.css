@@ -57,6 +57,38 @@ body {
 
 img { max-width: 100%; display: block; }
 a { text-decoration: none; color: inherit; }
+
+/* Skip link for accessibility */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    z-index: 10000;
+    padding: 12px 24px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: top 0.2s;
+}
+.skip-link:focus {
+    top: 16px;
+}
+
+/* Focus-visible for keyboard users */
+:focus-visible {
+    outline: 3px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
 ul { list-style: none; }
 
 .container {

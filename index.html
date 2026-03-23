@@ -7,22 +7,54 @@
     <meta name="keywords" content="recruitment, hiring, talent pipeline, staffing, jobs, UK recruitment agency, executive search, contract staffing, permanent recruitment, TF Pipeline">
     <meta name="author" content="TF Pipeline">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6366f1">
+    <!-- Open Graph -->
     <meta property="og:title" content="TF Pipeline | Recruitment That Delivers Results">
     <meta property="og:description" content="The UK's leading recruitment agency. Connecting exceptional talent with outstanding opportunities. Fast, reliable, results-driven.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.tfpipeline.co.uk">
+    <meta property="og:image" content="https://www.tfpipeline.co.uk/og-image.png">
+    <meta property="og:site_name" content="TF Pipeline">
+    <meta property="og:locale" content="en_GB">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TF Pipeline | Recruitment That Delivers Results">
+    <meta name="twitter:description" content="The UK's leading recruitment agency. Fast, reliable, results-driven hiring solutions.">
+    <meta name="twitter:image" content="https://www.tfpipeline.co.uk/og-image.png">
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EmploymentAgency",
+      "name": "TF Pipeline",
+      "description": "The UK's leading recruitment agency connecting exceptional talent with outstanding opportunities.",
+      "url": "https://www.tfpipeline.co.uk",
+      "areaServed": "United Kingdom",
+      "serviceType": ["Permanent Recruitment", "Contract Staffing", "Executive Search", "RPO"],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "availableLanguage": "English"
+      }
+    }
+    </script>
     <title>TF Pipeline | Recruitment That Delivers Results</title>
     <link rel="canonical" href="https://www.tfpipeline.co.uk">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%236366f1'/%3E%3Ctext x='50' y='68' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='52'%3ETF%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%236366f1'/%3E%3Ctext x='50' y='68' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='52'%3ETF%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Skip to content for accessibility -->
+    <a href="#home" class="skip-link">Skip to main content</a>
+
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
         <div class="container nav-container">
-            <a href="#" class="logo">
+            <a href="#" class="logo" aria-label="TF Pipeline - Home">
                 <span class="logo-tf">TF</span>
                 <span class="logo-pipeline">PIPELINE</span>
             </a>
@@ -47,6 +79,7 @@
     </nav>
 
     <!-- Hero Section -->
+    <main>
     <section class="hero" id="home">
         <div class="hero-bg">
             <div class="hero-gradient"></div>
@@ -468,7 +501,7 @@
                     </div>
                 </div>
                 <div class="contact-form-wrapper">
-                    <form class="contact-form" id="contactForm">
+                    <form class="contact-form" id="contactForm" aria-label="Contact form">
                         <div class="form-tabs">
                             <button type="button" class="form-tab active" data-tab="employer">I'm Hiring</button>
                             <button type="button" class="form-tab" data-tab="candidate">I'm Looking for Work</button>
@@ -525,6 +558,8 @@
     </section>
 
     <!-- Footer -->
+    </main>
+
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
