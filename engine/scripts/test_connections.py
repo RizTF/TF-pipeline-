@@ -92,23 +92,34 @@ def main():
             print(f"FAILED — {e}")
             results["Google Sheets"] = False
 
-    # 5. EWS (reads Paul's inbox)
-    print("Testing EWS (Paul's inbox)...", end=" ", flush=True)
-    if not EMAIL_PASSWORD:
-        print("SKIPPED (EMAIL_PASSWORD not set)")
-        results["EWS"] = None
-    else:
-        try:
-            from modules.imap_client import test_ews_connection
-            if test_ews_connection():
-                print("OK")
-                results["EWS"] = True
-            else:
-                print("FAILED")
-                results["EWS"] = False
-        except Exception as e:
-            print(f"FAILED — {e}")
-            results["EWS"] = False
+    # 5. Webhook queue (receives Paul's forwarded emails)
+    print("Testing webhook queue...", end=" ", flush=True)
+    try:
+        from modules.imap_client import test_webhook_queue
+        if test_webhook_queue():
+            print("OK")
+            results["Webhook Queue"] = True
+        else:
+            print("FAILED")
+            results["Webhook Queue"] = False
+    except Exception as e:
+        print(f"FAILED — {e}")
+        results["Webhook Queue"] = False
+
+    # 5b. Webhook server running check
+    print("Testing webhook server...", end=" ", flush=True)
+    try:
+        import requests
+        resp = requests.get("http://127.0.0.1:5111/health", timeout=3)
+        if resp.status_code == 200:
+            print(f"OK (queued: {resp.json().get('queued', 0)})")
+            results["Webhook Server"] = True
+        else:
+            print("FAILED (not responding)")
+            results["Webhook Server"] = False
+    except Exception:
+        print("NOT RUNNING (start with: python3 webhook_server.py)")
+        results["Webhook Server"] = None
 
     # 6. SMTP
     print("Testing SMTP (sending emails)...", end=" ", flush=True)

@@ -1,107 +1,61 @@
 """
-Google Sheets client — logs all email interactions to the Atlas bridge sheet.
+Google Sheets client — logs all email interactions via Node.js bridge.
+Uses subprocess to call sheets_bridge.js because the Google service account
+key format is incompatible with Python's google-auth library.
+Node.js (googleapis) handles the key correctly.
 """
 
-import base64
 import json
 import logging
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
-import gspread
-from google.oauth2.service_account import Credentials
-
-from config.settings import GOOGLE_SHEETS_ID, GOOGLE_CREDENTIALS_FILE
+from config.settings import GOOGLE_SHEETS_ID, GOOGLE_CREDENTIALS_FILE, ENGINE_ROOT
 
 logger = logging.getLogger("tf.sheets")
 
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
-]
-
-_client = None
-_sheet = None
+BRIDGE_SCRIPT = Path(__file__).parent / "sheets_bridge.js"
 
 
-def _load_credentials(creds_path: str) -> Credentials:
-    """Load service account credentials, with DER fallback for broken PEM keys."""
-    try:
-        return Credentials.from_service_account_file(creds_path, scopes=SCOPES)
-    except ValueError:
-        logger.info("PEM key loading failed, trying DER fallback")
+def _run_bridge(cmd: str, args: list[str] = None) -> dict:
+    """Call the Node.js sheets bridge and return parsed JSON result."""
+    command = ["node", str(BRIDGE_SCRIPT), cmd]
+    if args:
+        command.extend(args)
 
-    # DER fallback: manually decode the private key and build credentials
-    from cryptography.hazmat.primitives.serialization import load_der_private_key
-    from google.auth.crypt._cryptography_rsa import RSASigner
+    env = {
+        "GOOGLE_SHEETS_ID": GOOGLE_SHEETS_ID,
+        "GOOGLE_CREDENTIALS_FILE": str(Path(GOOGLE_CREDENTIALS_FILE).resolve())
+        if not Path(GOOGLE_CREDENTIALS_FILE).is_absolute()
+        else GOOGLE_CREDENTIALS_FILE,
+        "PATH": "/usr/local/bin:/usr/bin:/bin",
+    }
 
-    with open(creds_path) as f:
-        info = json.load(f)
-
-    pk_pem = info["private_key"]
-    pem_lines = pk_pem.strip().split("\n")
-    b64_body = "".join(l for l in pem_lines if not l.startswith("-----"))
-    der_bytes = base64.b64decode(b64_body)
-
-    private_key_obj = load_der_private_key(der_bytes, password=None)
-    signer = RSASigner(private_key_obj, key_id=info.get("private_key_id"))
-
-    return Credentials(
-        signer=signer,
-        service_account_email=info["client_email"],
-        token_uri=info.get("token_uri", "https://oauth2.googleapis.com/token"),
-        scopes=SCOPES,
-        project_id=info.get("project_id"),
-    )
-
-
-def _get_sheet():
-    """Lazy-load the Google Sheet connection."""
-    global _client, _sheet
-    if _sheet is not None:
-        return _sheet
-
+    # If credentials path is relative, resolve from engine root
     creds_path = Path(GOOGLE_CREDENTIALS_FILE)
-    if not creds_path.exists():
-        logger.warning(f"Google credentials file not found: {creds_path}")
-        return None
-
-    if not GOOGLE_SHEETS_ID:
-        logger.warning("GOOGLE_SHEETS_ID not set")
-        return None
+    if not creds_path.is_absolute():
+        env["GOOGLE_CREDENTIALS_FILE"] = str(ENGINE_ROOT / GOOGLE_CREDENTIALS_FILE)
 
     try:
-        creds = _load_credentials(str(creds_path))
-        _client = gspread.authorize(creds)
-        spreadsheet = _client.open_by_key(GOOGLE_SHEETS_ID)
-
-        # Get or create the "Employer Replies" worksheet
-        try:
-            _sheet = spreadsheet.worksheet("Employer Replies")
-        except gspread.exceptions.WorksheetNotFound:
-            _sheet = spreadsheet.add_worksheet(
-                title="Employer Replies", rows=1000, cols=10
-            )
-            # Add headers
-            _sheet.update(
-                "A1:J1",
-                [[
-                    "Timestamp",
-                    "From",
-                    "Name",
-                    "Company",
-                    "Subject",
-                    "Category",
-                    "Summary",
-                    "Urgency",
-                    "Action Taken",
-                    "Confidence",
-                ]],
-            )
-        return _sheet
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            cwd=str(ENGINE_ROOT),
+            env=env,
+        )
+        if result.returncode != 0:
+            logger.error(f"Bridge error: {result.stderr}")
+            return {"ok": False, "error": result.stderr}
+        return json.loads(result.stdout.strip())
+    except subprocess.TimeoutExpired:
+        logger.error("Bridge timeout")
+        return {"ok": False, "error": "timeout"}
     except Exception as e:
-        logger.error(f"Google Sheets connection error: {e}")
-        return None
+        logger.error(f"Bridge call failed: {e}")
+        return {"ok": False, "error": str(e)}
 
 
 def log_email(
@@ -116,39 +70,37 @@ def log_email(
     confidence: float,
 ) -> bool:
     """Append one row to the Employer Replies sheet."""
-    sheet = _get_sheet()
-    if sheet is None:
+    if not GOOGLE_SHEETS_ID:
         return False
 
-    try:
-        row = [
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            from_addr,
-            name,
-            company,
-            subject,
-            category,
-            summary,
-            urgency,
-            action,
-            str(round(confidence, 2)),
-        ]
-        sheet.append_row(row, value_input_option="USER_ENTERED")
+    row = json.dumps([
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        from_addr,
+        name,
+        company,
+        subject,
+        category,
+        summary,
+        urgency,
+        action,
+        str(round(confidence, 2)),
+    ])
+
+    result = _run_bridge("log", [row])
+    if result.get("ok"):
         logger.info(f"Logged to Sheets: {from_addr} — {category}")
         return True
-    except Exception as e:
-        logger.error(f"Sheets logging error: {e}")
+    else:
+        logger.error(f"Sheets logging error: {result.get('error')}")
         return False
 
 
 def test_connection() -> bool:
-    """Quick test that we can read the sheet."""
-    sheet = _get_sheet()
-    if sheet is None:
+    """Quick test that we can access the sheet."""
+    if not GOOGLE_SHEETS_ID:
+        logger.warning("GOOGLE_SHEETS_ID not set")
         return False
-    try:
-        sheet.row_values(1)
-        return True
-    except Exception as e:
-        logger.error(f"Sheets test failed: {e}")
-        return False
+    result = _run_bridge("test")
+    if not result.get("ok"):
+        logger.error(f"Sheets test failed: {result.get('error')}")
+    return result.get("ok", False)

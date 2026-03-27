@@ -1,9 +1,12 @@
 """
-Email client — reads Paul's Outlook inbox via EWS (Exchange Web Services)
+Email client — reads incoming emails from the webhook queue
 and sends replies via SMTP.
 
-EWS is used for reading because M365 blocks basic auth on IMAP.
-SMTP with basic auth still works for sending.
+Incoming emails arrive via webhook_server.py (Power Automate forwards
+Paul's emails to http://VPS_IP:5111/incoming). This module reads from
+the queue file and clears processed entries.
+
+SMTP with basic auth is used for sending replies (still works on M365).
 """
 
 import json
@@ -19,98 +22,40 @@ from config.settings import (
     SMTP_PORT,
     EMAIL_ADDRESS,
     EMAIL_PASSWORD,
-    PROCESSED_UIDS_FILE,
+    DATA_DIR,
 )
 
 logger = logging.getLogger("tf.imap")
 
-
-def _load_processed_uids() -> set:
-    if PROCESSED_UIDS_FILE.exists():
-        return set(json.loads(PROCESSED_UIDS_FILE.read_text()))
-    return set()
-
-
-def _save_processed_uids(uids: set) -> None:
-    PROCESSED_UIDS_FILE.write_text(json.dumps(sorted(uids)))
-
-
-def _get_ews_account():
-    """Connect to Paul's mailbox via EWS."""
-    from exchangelib import Credentials, Account, Configuration, DELEGATE
-
-    creds = Credentials(username=EMAIL_ADDRESS, password=EMAIL_PASSWORD)
-    config = Configuration(server="outlook.office365.com", credentials=creds)
-    account = Account(
-        primary_smtp_address=EMAIL_ADDRESS,
-        config=config,
-        autodiscover=False,
-        access_type=DELEGATE,
-    )
-    return account
+INCOMING_FILE = DATA_DIR / "incoming_emails.json"
 
 
 def fetch_new_emails() -> list[dict]:
     """
-    Fetch unread emails from Paul's inbox via EWS.
-    Returns list of dicts with email metadata + body.
+    Read queued emails from the webhook incoming file.
+    Clears the queue after reading.
     """
-    if not EMAIL_PASSWORD:
-        logger.warning("EMAIL_PASSWORD not set — skipping inbox check")
+    if not INCOMING_FILE.exists():
         return []
 
-    processed = _load_processed_uids()
-    new_emails = []
-
     try:
-        account = _get_ews_account()
+        raw = INCOMING_FILE.read_text().strip()
+        if not raw:
+            return []
 
-        # Get unread messages from inbox
-        unread = account.inbox.filter(is_read=False).order_by("-datetime_received")[:50]
+        emails = json.loads(raw)
+        if not emails:
+            return []
 
-        count = 0
-        for item in unread:
-            count += 1
-            msg_id = item.message_id or item.id
-            if msg_id in processed:
-                continue
+        # Clear the queue
+        INCOMING_FILE.write_text("[]")
 
-            from_addr = ""
-            if item.sender:
-                name = item.sender.name or ""
-                addr = item.sender.email_address or ""
-                from_addr = f"{name} <{addr}>" if name else addr
-
-            body = ""
-            if item.text_body:
-                body = item.text_body
-            elif item.body:
-                import re
-                body = re.sub(r"<[^>]+>", " ", str(item.body))
-                body = re.sub(r"\s+", " ", body).strip()
-
-            new_emails.append({
-                "uid": msg_id,
-                "from": from_addr,
-                "subject": item.subject or "",
-                "body": body[:3000],
-                "date": str(item.datetime_received or ""),
-                "message_id": item.message_id or "",
-            })
-
-            # Mark as read
-            item.is_read = True
-            item.save(update_fields=["is_read"])
-
-            processed.add(msg_id)
-
-        logger.info(f"Found {count} unread emails, {len(new_emails)} new")
-        _save_processed_uids(processed)
+        logger.info(f"Picked up {len(emails)} email(s) from webhook queue")
+        return emails
 
     except Exception as e:
-        logger.error(f"EWS error: {e}")
-
-    return new_emails
+        logger.error(f"Error reading webhook queue: {e}")
+        return []
 
 
 def send_reply(
@@ -154,17 +99,15 @@ def send_reply(
         return False
 
 
-def test_ews_connection() -> bool:
-    """Test that EWS can read Paul's inbox."""
-    if not EMAIL_PASSWORD:
-        return False
+def test_webhook_queue() -> bool:
+    """Test that the webhook queue file is accessible."""
     try:
-        account = _get_ews_account()
-        # Just access inbox to verify connection
-        account.inbox.total_count
+        if not INCOMING_FILE.exists():
+            INCOMING_FILE.write_text("[]")
+        json.loads(INCOMING_FILE.read_text())
         return True
     except Exception as e:
-        logger.error(f"EWS test failed: {e}")
+        logger.error(f"Webhook queue test failed: {e}")
         return False
 
 
