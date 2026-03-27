@@ -29,12 +29,15 @@ ANTHROPIC_API_KEY = _require("ANTHROPIC_API_KEY")
 CLAUDE_MODEL = "claude-sonnet-4-20250514"
 
 # --- Email ---
-IMAP_SERVER = _optional("IMAP_SERVER", "outlook.office365.com")
-IMAP_PORT = int(_optional("IMAP_PORT", "993"))
 SMTP_SERVER = _optional("SMTP_SERVER", "smtp.office365.com")
 SMTP_PORT = int(_optional("SMTP_PORT", "587"))
 EMAIL_ADDRESS = _require("EMAIL_ADDRESS")
 EMAIL_PASSWORD = _optional("EMAIL_PASSWORD")
+
+# --- Azure AD (for Microsoft Graph API — reads Paul's inbox) ---
+AZURE_TENANT_ID = _optional("AZURE_TENANT_ID")
+AZURE_CLIENT_ID = _optional("AZURE_CLIENT_ID")
+AZURE_CLIENT_SECRET = _optional("AZURE_CLIENT_SECRET")
 
 # --- Telegram ---
 TELEGRAM_BOT_TOKEN = _require("TELEGRAM_BOT_TOKEN")

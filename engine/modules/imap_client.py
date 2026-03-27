@@ -1,29 +1,37 @@
 """
-IMAP / SMTP client — reads Paul's Outlook inbox and sends replies.
+Email client — reads Paul's Outlook inbox via Microsoft Graph API
+and sends replies via SMTP.
+
+Graph API is used for reading because M365 blocks basic auth on IMAP.
+SMTP with basic auth still works for sending.
 """
 
-import imaplib
-import smtplib
-import email
 import json
 import logging
+import smtplib
+import email.utils
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.header import decode_header
-from datetime import datetime
 from typing import Optional
 
+import requests
+
 from config.settings import (
-    IMAP_SERVER,
-    IMAP_PORT,
     SMTP_SERVER,
     SMTP_PORT,
     EMAIL_ADDRESS,
     EMAIL_PASSWORD,
+    AZURE_TENANT_ID,
+    AZURE_CLIENT_ID,
+    AZURE_CLIENT_SECRET,
     PROCESSED_UIDS_FILE,
 )
 
 logger = logging.getLogger("tf.imap")
+
+# Microsoft Graph endpoints
+GRAPH_BASE = "https://graph.microsoft.com/v1.0"
+TOKEN_URL = "https://login.microsoftonline.com/{tenant}/oauth2/v2/token"
 
 
 def _load_processed_uids() -> set:
@@ -36,109 +44,99 @@ def _save_processed_uids(uids: set) -> None:
     PROCESSED_UIDS_FILE.write_text(json.dumps(sorted(uids)))
 
 
-def _decode_header_value(value: str) -> str:
-    """Decode an email header that might be encoded."""
-    if not value:
-        return ""
-    parts = decode_header(value)
-    decoded = []
-    for part, charset in parts:
-        if isinstance(part, bytes):
-            decoded.append(part.decode(charset or "utf-8", errors="replace"))
-        else:
-            decoded.append(part)
-    return " ".join(decoded)
+def _get_graph_token() -> Optional[str]:
+    """Get an OAuth2 access token for Microsoft Graph using client credentials."""
+    if not all([AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET]):
+        logger.warning("Azure credentials not set — cannot use Graph API")
+        return None
 
-
-def _extract_body(msg: email.message.Message) -> str:
-    """Extract plain-text body from an email message."""
-    if msg.is_multipart():
-        for part in msg.walk():
-            ct = part.get_content_type()
-            if ct == "text/plain" and part.get("Content-Disposition") != "attachment":
-                payload = part.get_payload(decode=True)
-                if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    return payload.decode(charset, errors="replace")
-        # Fallback: try text/html
-        for part in msg.walk():
-            ct = part.get_content_type()
-            if ct == "text/html" and part.get("Content-Disposition") != "attachment":
-                payload = part.get_payload(decode=True)
-                if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    return payload.decode(charset, errors="replace")
-    else:
-        payload = msg.get_payload(decode=True)
-        if payload:
-            charset = msg.get_content_charset() or "utf-8"
-            return payload.decode(charset, errors="replace")
-    return ""
+    try:
+        resp = requests.post(
+            TOKEN_URL.format(tenant=AZURE_TENANT_ID),
+            data={
+                "client_id": AZURE_CLIENT_ID,
+                "client_secret": AZURE_CLIENT_SECRET,
+                "scope": "https://graph.microsoft.com/.default",
+                "grant_type": "client_credentials",
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json()["access_token"]
+    except Exception as e:
+        logger.error(f"Graph token error: {e}")
+        return None
 
 
 def fetch_new_emails() -> list[dict]:
     """
-    Connect to Paul's inbox via IMAP, fetch unread emails we haven't
-    processed yet. Returns list of dicts with email metadata + body.
+    Fetch unread emails from Paul's inbox via Microsoft Graph API.
+    Returns list of dicts with email metadata + body.
     """
-    if not EMAIL_PASSWORD:
-        logger.warning("EMAIL_PASSWORD not set — skipping inbox check")
+    token = _get_graph_token()
+    if not token:
         return []
 
     processed = _load_processed_uids()
     new_emails = []
+    headers = {"Authorization": f"Bearer {token}"}
 
     try:
-        imap = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
-        imap.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        imap.select("INBOX")
+        # Fetch unread messages
+        url = (
+            f"{GRAPH_BASE}/users/{EMAIL_ADDRESS}/messages"
+            f"?$filter=isRead eq false"
+            f"&$select=id,from,subject,body,receivedDateTime,internetMessageId"
+            f"&$top=50"
+            f"&$orderby=receivedDateTime desc"
+        )
+        resp = requests.get(url, headers=headers, timeout=30)
+        resp.raise_for_status()
+        messages = resp.json().get("value", [])
 
-        # Search for unseen messages
-        status, data = imap.search(None, "UNSEEN")
-        if status != "OK" or not data[0]:
-            imap.logout()
-            return []
+        logger.info(f"Found {len(messages)} unread emails")
 
-        uids = data[0].split()
-        logger.info(f"Found {len(uids)} unread emails")
-
-        for uid_bytes in uids:
-            uid = uid_bytes.decode()
-            if uid in processed:
+        for msg in messages:
+            msg_id = msg["id"]
+            if msg_id in processed:
                 continue
 
-            status, msg_data = imap.fetch(uid_bytes, "(RFC822)")
-            if status != "OK":
-                continue
+            from_data = msg.get("from", {}).get("emailAddress", {})
+            from_addr = f"{from_data.get('name', '')} <{from_data.get('address', '')}>"
+            subject = msg.get("subject", "")
+            body = msg.get("body", {}).get("content", "")
+            # Strip HTML tags for plain text
+            if msg.get("body", {}).get("contentType") == "html":
+                import re
+                body = re.sub(r"<[^>]+>", " ", body)
+                body = re.sub(r"\s+", " ", body).strip()
 
-            raw = msg_data[0][1]
-            msg = email.message_from_bytes(raw)
+            new_emails.append({
+                "uid": msg_id,
+                "from": from_addr,
+                "subject": subject,
+                "body": body[:3000],
+                "date": msg.get("receivedDateTime", ""),
+                "message_id": msg.get("internetMessageId", ""),
+            })
 
-            from_addr = _decode_header_value(msg.get("From", ""))
-            subject = _decode_header_value(msg.get("Subject", ""))
-            body = _extract_body(msg)
-            date_str = msg.get("Date", "")
-            message_id = msg.get("Message-ID", "")
+            # Mark as read in Outlook
+            try:
+                requests.patch(
+                    f"{GRAPH_BASE}/users/{EMAIL_ADDRESS}/messages/{msg_id}",
+                    headers={**headers, "Content-Type": "application/json"},
+                    json={"isRead": True},
+                    timeout=10,
+                )
+            except Exception:
+                pass
 
-            new_emails.append(
-                {
-                    "uid": uid,
-                    "from": from_addr,
-                    "subject": subject,
-                    "body": body[:3000],  # Truncate very long bodies
-                    "date": date_str,
-                    "message_id": message_id,
-                }
-            )
-
-            # Mark as processed
-            processed.add(uid)
+            processed.add(msg_id)
 
         _save_processed_uids(processed)
-        imap.logout()
 
     except Exception as e:
-        logger.error(f"IMAP error: {e}")
+        logger.error(f"Graph API error: {e}")
 
     return new_emails
 
@@ -184,17 +182,21 @@ def send_reply(
         return False
 
 
-def test_imap_connection() -> bool:
-    """Quick test that IMAP login works."""
-    if not EMAIL_PASSWORD:
+def test_graph_connection() -> bool:
+    """Test that Graph API can read Paul's inbox."""
+    token = _get_graph_token()
+    if not token:
         return False
     try:
-        imap = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
-        imap.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        imap.logout()
+        resp = requests.get(
+            f"{GRAPH_BASE}/users/{EMAIL_ADDRESS}/messages?$top=1&$select=id",
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=15,
+        )
+        resp.raise_for_status()
         return True
     except Exception as e:
-        logger.error(f"IMAP test failed: {e}")
+        logger.error(f"Graph API test failed: {e}")
         return False
 
 

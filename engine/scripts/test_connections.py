@@ -11,7 +11,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config.settings import EMAIL_PASSWORD, AC_API_KEY, GOOGLE_SHEETS_ID
+from config.settings import (
+    EMAIL_PASSWORD, AC_API_KEY, GOOGLE_SHEETS_ID,
+    AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET,
+)
 
 
 def main():
@@ -92,23 +95,23 @@ def main():
             print(f"FAILED — {e}")
             results["Google Sheets"] = False
 
-    # 5. IMAP
-    print("Testing IMAP (Paul's inbox)...", end=" ", flush=True)
-    if not EMAIL_PASSWORD:
-        print("SKIPPED (EMAIL_PASSWORD not set — Paul adds this last)")
-        results["IMAP"] = None
+    # 5. Microsoft Graph API (reads Paul's inbox)
+    print("Testing Graph API (Paul's inbox)...", end=" ", flush=True)
+    if not all([AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET]):
+        print("SKIPPED (AZURE_TENANT_ID/CLIENT_ID/CLIENT_SECRET not set)")
+        results["Graph API"] = None
     else:
         try:
-            from modules.imap_client import test_imap_connection
-            if test_imap_connection():
+            from modules.imap_client import test_graph_connection
+            if test_graph_connection():
                 print("OK")
-                results["IMAP"] = True
+                results["Graph API"] = True
             else:
                 print("FAILED")
-                results["IMAP"] = False
+                results["Graph API"] = False
         except Exception as e:
             print(f"FAILED — {e}")
-            results["IMAP"] = False
+            results["Graph API"] = False
 
     # 6. SMTP
     print("Testing SMTP (sending emails)...", end=" ", flush=True)

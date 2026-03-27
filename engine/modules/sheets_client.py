@@ -2,6 +2,8 @@
 Google Sheets client — logs all email interactions to the Atlas bridge sheet.
 """
 
+import base64
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +24,37 @@ _client = None
 _sheet = None
 
 
+def _load_credentials(creds_path: str) -> Credentials:
+    """Load service account credentials, with DER fallback for broken PEM keys."""
+    try:
+        return Credentials.from_service_account_file(creds_path, scopes=SCOPES)
+    except ValueError:
+        logger.info("PEM key loading failed, trying DER fallback")
+
+    # DER fallback: manually decode the private key and build credentials
+    from cryptography.hazmat.primitives.serialization import load_der_private_key
+    from google.auth.crypt._cryptography_rsa import RSASigner
+
+    with open(creds_path) as f:
+        info = json.load(f)
+
+    pk_pem = info["private_key"]
+    pem_lines = pk_pem.strip().split("\n")
+    b64_body = "".join(l for l in pem_lines if not l.startswith("-----"))
+    der_bytes = base64.b64decode(b64_body)
+
+    private_key_obj = load_der_private_key(der_bytes, password=None)
+    signer = RSASigner(private_key_obj, key_id=info.get("private_key_id"))
+
+    return Credentials(
+        signer=signer,
+        service_account_email=info["client_email"],
+        token_uri=info.get("token_uri", "https://oauth2.googleapis.com/token"),
+        scopes=SCOPES,
+        project_id=info.get("project_id"),
+    )
+
+
 def _get_sheet():
     """Lazy-load the Google Sheet connection."""
     global _client, _sheet
@@ -38,7 +71,7 @@ def _get_sheet():
         return None
 
     try:
-        creds = Credentials.from_service_account_file(str(creds_path), scopes=SCOPES)
+        creds = _load_credentials(str(creds_path))
         _client = gspread.authorize(creds)
         spreadsheet = _client.open_by_key(GOOGLE_SHEETS_ID)
 
