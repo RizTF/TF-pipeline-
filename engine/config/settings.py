@@ -34,10 +34,6 @@ SMTP_PORT = int(_optional("SMTP_PORT", "587"))
 EMAIL_ADDRESS = _require("EMAIL_ADDRESS")
 EMAIL_PASSWORD = _optional("EMAIL_PASSWORD")
 
-# --- Azure AD (for Microsoft Graph API — reads Paul's inbox) ---
-AZURE_TENANT_ID = _optional("AZURE_TENANT_ID")
-AZURE_CLIENT_ID = _optional("AZURE_CLIENT_ID")
-AZURE_CLIENT_SECRET = _optional("AZURE_CLIENT_SECRET")
 
 # --- Telegram ---
 TELEGRAM_BOT_TOKEN = _require("TELEGRAM_BOT_TOKEN")
