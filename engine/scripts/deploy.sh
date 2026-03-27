@@ -43,8 +43,16 @@ fi
 # 1. Upload engine files (including .env)
 echo "[1/5] Uploading engine files to VPS..."
 ssh "$REMOTE" "mkdir -p $APP_DIR/{config,data,logs,scripts,modules}"
-rsync -avz --exclude='venv' --exclude='__pycache__' \
-    "$ENGINE_DIR/" "$REMOTE:$APP_DIR/"
+
+# Use scp (works on Git Bash — rsync often not available on Windows)
+scp "$ENGINE_DIR/inbox_watcher.py" "$ENGINE_DIR/telegram_handler.py" \
+    "$ENGINE_DIR/requirements.txt" "$ENGINE_DIR/.env" \
+    "$ENGINE_DIR/.env.example" "$REMOTE:$APP_DIR/"
+scp "$ENGINE_DIR/config/settings.py" "$ENGINE_DIR/config/__init__.py" \
+    "$REMOTE:$APP_DIR/config/"
+scp "$ENGINE_DIR/modules/"*.py "$REMOTE:$APP_DIR/modules/"
+scp "$ENGINE_DIR/scripts/"*.py "$ENGINE_DIR/scripts/"*.sh \
+    "$REMOTE:$APP_DIR/scripts/"
 echo "  Done."
 
 # 2. Link Google credentials from Scout
