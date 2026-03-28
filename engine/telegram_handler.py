@@ -58,14 +58,31 @@ def _save_drafts(drafts: dict) -> None:
 
 
 def process_command(text: str) -> None:
-    """Process a SEND or SKIP command from Riz."""
+    """Process a SEND, SKIP, or EDIT command from Riz."""
     parts = text.strip().split(None, 1)
     if len(parts) < 2:
-        send_message("Usage: <code>SEND draft_1</code> or <code>SKIP draft_1</code>")
+        send_message(
+            "Usage:\n"
+            "<code>SEND draft_1</code> — send as-is\n"
+            "<code>SKIP draft_1</code> — discard\n"
+            "<code>EDIT draft_1 your new text here</code> — replace draft body and send"
+        )
         return
 
     command = parts[0].upper()
-    draft_id = parts[1].strip()
+    remainder = parts[1].strip()
+
+    # EDIT has 3 parts: EDIT draft_id new_body
+    if command == "EDIT":
+        edit_parts = remainder.split(None, 1)
+        if len(edit_parts) < 2:
+            send_message("Usage: <code>EDIT draft_1 Your replacement text here</code>")
+            return
+        draft_id = edit_parts[0]
+        new_body = edit_parts[1]
+    else:
+        draft_id = remainder
+        new_body = None
 
     drafts = _load_drafts()
 
@@ -88,11 +105,26 @@ def process_command(text: str) -> None:
             send_message(f"Failed to send reply to {draft['to']} — check email credentials")
             return  # Don't delete draft if send failed
 
+    elif command == "EDIT":
+        # Update draft body and send
+        draft["body"] = new_body
+        success = send_reply(
+            to_address=draft["to"],
+            subject=draft["subject"],
+            body=new_body,
+            in_reply_to=draft.get("in_reply_to"),
+        )
+        if success:
+            send_message(f"Edited and sent reply to {draft['to']}")
+        else:
+            send_message(f"Failed to send edited reply to {draft['to']}")
+            return
+
     elif command == "SKIP":
         send_message(f"Skipped draft for {draft['to']} — no reply sent.")
 
     else:
-        send_message(f"Unknown command: {command}. Use SEND or SKIP.")
+        send_message(f"Unknown command: {command}. Use SEND, SKIP, or EDIT.")
         return
 
     # Remove processed draft
@@ -122,7 +154,7 @@ def main():
             _save_offset(update_id + 1)
             continue
 
-        if text.upper().startswith(("SEND ", "SKIP ")):
+        if text.upper().startswith(("SEND ", "SKIP ", "EDIT ")):
             logger.info(f"Processing command: {text}")
             process_command(text)
         else:

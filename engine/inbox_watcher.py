@@ -33,7 +33,14 @@ from modules.claude_client import (
     generate_reply,
     generate_draft,
     generate_precall_brief,
+    generate_objection_reply,
 )
+from modules.conversation_store import (
+    add_inbound,
+    add_outbound,
+    format_history_for_prompt,
+)
+from modules.company_research import research_company
 from modules.telegram_client import (
     notify_positive,
     notify_complex,
@@ -100,6 +107,12 @@ def process_email(email_data: dict) -> None:
 
     logger.info(f"Classified as {category} (confidence: {confidence})")
 
+    # Get conversation history for threading
+    history = format_history_for_prompt(sender_email)
+
+    # Record this inbound email
+    add_inbound(sender_email, subject, body, category)
+
     action_taken = ""
 
     # Step 2: Act based on category
@@ -108,24 +121,28 @@ def process_email(email_data: dict) -> None:
         logger.info("Auto-reply detected — ignoring")
 
     elif category == "POSITIVE":
-        reply_text = generate_reply(from_addr, subject, body, category)
+        reply_text = generate_reply(from_addr, subject, body, category, history=history)
         if reply_text:
             reply_subject = f"Re: {subject}" if not subject.startswith("Re:") else subject
             sent = send_reply(sender_email, reply_subject, reply_text, message_id)
             action_taken = "Auto-reply sent" if sent else "Reply generation failed"
+            if sent:
+                add_outbound(sender_email, reply_subject, reply_text)
         suppress_contact(sender_email, "positive-reply")
         notify_positive(sender_name, sender_company, subject, summary)
 
     elif category == "QUESTION":
-        reply_text = generate_reply(from_addr, subject, body, category)
+        reply_text = generate_reply(from_addr, subject, body, category, history=history)
         if reply_text:
             reply_subject = f"Re: {subject}" if not subject.startswith("Re:") else subject
             sent = send_reply(sender_email, reply_subject, reply_text, message_id)
             action_taken = "Question auto-answered" if sent else "Reply failed"
+            if sent:
+                add_outbound(sender_email, reply_subject, reply_text)
         notify_question_answered(sender_name, subject, summary)
 
     elif category == "COMPLEX":
-        draft_text = generate_draft(from_addr, subject, body, summary)
+        draft_text = generate_draft(from_addr, subject, body, summary, history=history)
         drafts = _load_drafts()
         draft_id = _next_draft_id(drafts)
         drafts[draft_id] = {
@@ -142,13 +159,40 @@ def process_email(email_data: dict) -> None:
         action_taken = f"Draft created ({draft_id}) — awaiting approval"
 
     elif category == "NOT_INTERESTED":
-        suppress_contact(sender_email, "not-interested")
-        # Send polite close
-        reply_text = generate_reply(from_addr, subject, body, category)
+        # Research the company for personalised objection handling
+        logger.info(f"Researching {sender_company or sender_email} for objection handling...")
+        company_info = research_company(sender_email, sender_name, sender_company)
+
+        # Generate smart objection-handling reply instead of generic polite close
+        reply_text = generate_objection_reply(
+            from_addr, subject, body,
+            history=history, company_research=company_info
+        )
         if reply_text:
             reply_subject = f"Re: {subject}" if not subject.startswith("Re:") else subject
-            send_reply(sender_email, reply_subject, reply_text, message_id)
-        action_taken = "Suppressed + polite close sent"
+
+            # Create as draft for Riz to review — objection handling needs human approval
+            drafts = _load_drafts()
+            draft_id = _next_draft_id(drafts)
+            drafts[draft_id] = {
+                "to": sender_email,
+                "subject": reply_subject,
+                "body": reply_text,
+                "in_reply_to": message_id,
+                "created": datetime.now().isoformat(),
+                "type": "objection_handling",
+            }
+            _save_drafts(drafts)
+            notify_complex(
+                draft_id, sender_name, sender_company, subject,
+                f"NOT INTERESTED — objection handling draft with company research",
+                reply_text,
+            )
+            action_taken = f"Objection draft created ({draft_id}) — awaiting approval"
+        else:
+            action_taken = "NOT_INTERESTED — objection reply failed"
+
+        suppress_contact(sender_email, "not-interested")
 
     elif category == "UNSUBSCRIBE":
         hard_unsubscribe(sender_email)

@@ -96,6 +96,38 @@ Based on the email thread provided, create a concise brief with:
 Keep it under 200 words. Use bullet points. Be direct."""
 
 
+# ── Objection handling prompt ───────────────────────────────────────
+
+OBJECTION_SYSTEM = """You are Paul from TalentFinder, a UK fixed-fee recruitment company. You are writing a warm, persuasive reply to someone who has said they're not interested.
+
+Your goal is NOT to be pushy — it's to address their likely objection with relevant, personalised information that shows you understand their business and can genuinely help.
+
+About TalentFinder:
+- Fixed-fee recruitment — NO commission, NO percentage of salary
+- Guaranteed hire — we work until the role is filled
+- Average fill time: 6 weeks
+- Trusted by 23,000+ employers across 76+ cities
+- Pricing from just £1,500 + VAT (significantly cheaper than agency commission of 15-25% of salary)
+
+Common objections and how to handle them:
+- "We use internal recruiters" → Emphasise TalentFinder as a supplement, not a replacement. Fixed fee means no risk.
+- "Too expensive" → Compare to agency commission (e.g. a £40k role at 20% = £8,000 vs TalentFinder's £2,000 fixed fee)
+- "Not hiring right now" → Offer to keep in touch, mention no obligation, plant the seed for future needs
+- "We use another agency" → Highlight fixed-fee vs commission, guaranteed hire, no lock-in
+- "Not interested" (generic) → Use company research to find a relevant angle
+
+Rules:
+- Keep it under 120 words — short and punchy
+- Sign off as "Paul"
+- ONE key point only — don't overwhelm
+- Be respectful — acknowledge their position, don't argue
+- If they've been contacted multiple times (visible in history), be extra gentle
+- Include the Calendly link ONLY if there's a clear opening: {calendly_link}
+- NEVER be aggressive, guilt-trip, or use high-pressure tactics
+- If the conversation history shows they've declined twice, send a graceful final goodbye instead
+""".format(calendly_link=CALENDLY_LINK)
+
+
 def classify_email(from_addr: str, subject: str, body: str) -> dict:
     """
     Classify an inbound email. Returns dict with category, confidence, etc.
@@ -139,18 +171,19 @@ def classify_email(from_addr: str, subject: str, body: str) -> dict:
         }
 
 
-def generate_reply(from_addr: str, subject: str, body: str, category: str) -> str:
+def generate_reply(from_addr: str, subject: str, body: str, category: str, history: str = "") -> str:
     """
     Generate an appropriate reply for the given email category.
-    Returns the reply text.
+    Returns the reply text. Includes conversation history if available.
     """
     user_msg = (
         f"Category: {category}\n"
         f"From: {from_addr}\n"
         f"Subject: {subject}\n\n"
-        f"{body}\n\n"
-        f"Write a reply from Paul."
     )
+    if history:
+        user_msg += f"{history}\n\n"
+    user_msg += f"Latest email:\n{body}\n\nWrite a reply from Paul."
 
     try:
         response = client.messages.create(
@@ -165,7 +198,42 @@ def generate_reply(from_addr: str, subject: str, body: str, category: str) -> st
         return ""
 
 
-def generate_draft(from_addr: str, subject: str, body: str, summary: str) -> str:
+def generate_objection_reply(
+    from_addr: str, subject: str, body: str,
+    history: str = "", company_research: str = ""
+) -> str:
+    """
+    Generate a smart objection-handling reply for NOT_INTERESTED emails.
+    Uses conversation history and real-time company research.
+    """
+    user_msg = f"From: {from_addr}\nSubject: {subject}\n\n"
+
+    if history:
+        user_msg += f"{history}\n\n"
+
+    if company_research:
+        user_msg += (
+            f"--- COMPANY RESEARCH (use to personalise your reply) ---\n"
+            f"{company_research}\n"
+            f"--- END RESEARCH ---\n\n"
+        )
+
+    user_msg += f"Their latest email:\n{body}\n\nWrite a warm, persuasive objection-handling reply from Paul."
+
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=600,
+            system=OBJECTION_SYSTEM,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        return response.content[0].text.strip()
+    except Exception as e:
+        logger.error(f"Claude API error generating objection reply: {e}")
+        return ""
+
+
+def generate_draft(from_addr: str, subject: str, body: str, summary: str, history: str = "") -> str:
     """
     Generate a draft reply for COMPLEX emails that Riz must approve.
     """
@@ -174,9 +242,10 @@ def generate_draft(from_addr: str, subject: str, body: str, summary: str) -> str
         f"Summary: {summary}\n\n"
         f"From: {from_addr}\n"
         f"Subject: {subject}\n\n"
-        f"{body}\n\n"
-        f"Write a thoughtful draft reply from Paul. Riz will review before sending."
     )
+    if history:
+        user_msg += f"{history}\n\n"
+    user_msg += f"Latest email:\n{body}\n\nWrite a thoughtful draft reply from Paul. Riz will review before sending."
 
     try:
         response = client.messages.create(

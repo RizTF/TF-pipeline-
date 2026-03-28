@@ -60,7 +60,8 @@ def notify_complex(
         f"<b>Subject:</b> {subject}\n"
         f"<b>Summary:</b> {summary}\n\n"
         f"<b>Draft reply:</b>\n<i>{draft[:2000]}</i>\n\n"
-        f"Reply <code>SEND {draft_id}</code> to send this.\n"
+        f"Reply <code>SEND {draft_id}</code> to send as-is.\n"
+        f"Reply <code>EDIT {draft_id} your text here</code> to edit and send.\n"
         f"Reply <code>SKIP {draft_id}</code> to discard."
     )
     return send_message(msg)
