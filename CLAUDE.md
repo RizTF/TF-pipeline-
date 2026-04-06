@@ -342,3 +342,28 @@ Skills aren't static — they auto-improve when they fail or produce subpar outp
 ```
 
 **GitHub:** github.com/Shmayro/singularity-claude
+
+### Claude Peers MCP (Multi-Session Messaging)
+Lets all your Claude Code sessions discover each other and send messages instantly.
+Any Claude can find the others and communicate in real-time across projects.
+
+**Install:**
+```bash
+git clone https://github.com/louislva/claude-peers-mcp.git ~/claude-peers-mcp
+cd ~/claude-peers-mcp && bun install
+claude mcp add --scope user --transport stdio claude-peers -- bun ~/claude-peers-mcp/server.ts
+```
+
+**Commands (inside Claude Code):**
+- `list_peers` — Discover other active sessions
+- `send_message` — Send message to another session
+- `set_summary` — Describe current work
+- `check_messages` — Poll for incoming messages
+
+**CLI tools:**
+- `bun cli.ts status` — View broker and all peers
+- `bun cli.ts peers` — List active instances
+- `bun cli.ts send <id> <msg>` — Inject messages
+
+**Requires:** Bun runtime + Claude Code v2.1.80+
+**GitHub:** github.com/louislva/claude-peers-mcp
