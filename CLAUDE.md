@@ -367,3 +367,25 @@ claude mcp add --scope user --transport stdio claude-peers -- bun ~/claude-peers
 
 **Requires:** Bun runtime + Claude Code v2.1.80+
 **GitHub:** github.com/louislva/claude-peers-mcp
+
+### Superpowers (Development Methodology Framework)
+Composable skills for structured software development: brainstorming, planning,
+TDD, debugging, code review, subagent-driven development, and git worktrees.
+
+**Install in any Claude Code CLI session:**
+```
+/plugin install superpowers@claude-plugins-official
+```
+
+**Core workflow:** brainstorm → plan → execute (via subagents) → test → review → merge
+
+**Skills included:**
+- brainstorming, writing-plans, executing-plans
+- test-driven-development, systematic-debugging
+- subagent-driven-development, dispatching-parallel-agents
+- requesting-code-review, receiving-code-review
+- using-git-worktrees, finishing-a-development-branch
+- verification-before-completion, writing-skills
+
+**Also works with:** Cursor, Codex, OpenCode, GitHub Copilot CLI, Gemini CLI
+**GitHub:** github.com/obra/superpowers
