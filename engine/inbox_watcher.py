@@ -225,6 +225,13 @@ def process_email(email_data: dict) -> None:
 
 def main():
     logger.info("=== Inbox watcher run started ===")
+
+    # Check if engine is paused via Telegram PAUSE command
+    pause_file = DATA_DIR / "paused.flag"
+    if pause_file.exists():
+        logger.info("Engine is PAUSED — skipping this run")
+        return
+
     emails = fetch_new_emails()
 
     if not emails:
