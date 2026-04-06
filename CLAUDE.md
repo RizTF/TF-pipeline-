@@ -324,3 +324,21 @@ Auto-detects what you're building and generates verifiable checklists.
 ```
 
 **GitHub:** github.com/uditgoenka/autoresearch
+
+### Singularity (Self-Evolving Skills)
+Skills that create, score, repair, and harden themselves through recursive improvement loops.
+Skills aren't static — they auto-improve when they fail or produce subpar output.
+
+**Commands:**
+- `/singularity-create` — Build a new skill with scoring
+- `/singularity-score` — Rate output on 5 dimensions
+- `/singularity-repair` — Auto-fix skills scoring below 50
+- `/singularity-crystallize` — Lock skills scoring 90+ over 5 runs
+
+**Install in any Claude Code CLI session:**
+```
+/plugin marketplace add Shmayro/singularity-claude
+/plugin install singularity-claude
+```
+
+**GitHub:** github.com/Shmayro/singularity-claude
