@@ -389,3 +389,42 @@ TDD, debugging, code review, subagent-driven development, and git worktrees.
 
 **Also works with:** Cursor, Codex, OpenCode, GitHub Copilot CLI, Gemini CLI
 **GitHub:** github.com/obra/superpowers
+
+### Claude-Mem (Persistent Memory Across Sessions)
+Auto-captures everything Claude does, compresses with AI, and injects relevant
+context into future sessions. No more repeating yourself — Claude remembers.
+Uses SQLite + Chroma vector DB for hybrid semantic + keyword search.
+
+**Install in any Claude Code CLI session:**
+```
+/plugin marketplace add thedotmack/claude-mem
+/plugin install claude-mem
+```
+
+**GitHub:** github.com/thedotmack/claude-mem
+
+### Connect-Apps (500+ App Integrations via Composio)
+Send emails, create GitHub issues, post to Slack, update Notion, manage databases.
+Claude takes real actions across 500+ services — not just writes code.
+
+**Install:**
+```bash
+git clone https://github.com/composiohq/awesome-claude-plugins.git
+cd awesome-claude-plugins
+claude --plugin-dir ./connect-apps
+```
+
+Requires free API key from platform.composio.dev
+**GitHub:** github.com/ComposioHQ/awesome-claude-plugins
+
+### Playwright MCP (Browser Control)
+Claude controls a real Chrome window — clicks buttons, fills forms, navigates pages,
+takes screenshots. Ideal for testing web apps and interacting with UIs like ActiveCampaign.
+
+**Install:**
+```bash
+npm install -g @anthropic-ai/mcp-playwright
+claude mcp add playwright -- npx @anthropic-ai/mcp-playwright
+```
+
+**Key for AC outreach project** — Claude can interact with ActiveCampaign UI directly.
