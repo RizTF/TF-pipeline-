@@ -295,3 +295,32 @@ Planned system to generate personalised cold outreach at scale:
 
 API cost estimate: ~£8/day for 1,000 emails (Claude Sonnet).
 See HANDOVER.md for full strategy.
+
+---
+
+## Recommended Plugins
+
+### CLI-Anything
+Makes 40+ desktop apps controllable by Claude through structured CLI commands.
+Supports: GIMP, Blender, OBS, LibreOffice, Audacity, browser automation, and more.
+
+**Install in any Claude Code CLI session:**
+```
+/plugin marketplace add HKUDS/CLI-Anything
+/plugin install cli-anything
+```
+
+**GitHub:** github.com/HKUDS/CLI-Anything
+**CLI-Hub:** https://hkuds.github.io/CLI-Anything/
+
+### Auto Research (Karpathy-inspired)
+Autonomous goal-directed iteration: Modify → Verify → Keep/Discard → Repeat.
+Auto-detects what you're building and generates verifiable checklists.
+
+**Install in any Claude Code CLI session:**
+```
+/plugin marketplace add uditgoenka/autoresearch
+/plugin install autoresearch
+```
+
+**GitHub:** github.com/uditgoenka/autoresearch
