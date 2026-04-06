@@ -428,3 +428,11 @@ claude mcp add playwright -- npx @anthropic-ai/mcp-playwright
 ```
 
 **Key for AC outreach project** — Claude can interact with ActiveCampaign UI directly.
+
+### ClaudeTube (YouTube & Video Transcription)
+Transcribes YouTube videos, extracts frames, and lets Claude "watch" videos.
+Supports 1,500+ video sites (YouTube, TikTok, Twitter/X, Vimeo, etc.).
+Just paste a YouTube link and ask Claude to summarise or extract info.
+
+**Already installed.** MCP server registered as `claudetube`.
+**GitHub:** github.com/thoughtpunch/claudetube
