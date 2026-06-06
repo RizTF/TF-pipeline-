@@ -1,3 +1,7 @@
 anthropic>=0.39.0
+# Optional backup / cost-saving provider. Also covers any OpenAI-compatible
+# API (OpenRouter, Groq, DeepSeek, Together, local Ollama/LM Studio) via
+# OPENAI_BASE_URL. Safe to keep installed even when running Anthropic-only.
+openai>=1.40.0
 python-dotenv>=1.0.0
 requests>=2.31.0

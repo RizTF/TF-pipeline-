@@ -22,25 +22,24 @@ def main():
 
     results = {}
 
-    # 1. Claude API
-    print("Testing Claude API...", end=" ", flush=True)
+    # 1. LLM layer (provider-agnostic, with failover)
+    from modules import llm
+    print(f"Testing LLM layer (providers: {', '.join(llm.active_providers())})...", end=" ", flush=True)
     try:
-        from modules.claude_client import client, CLAUDE_MODEL
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
+        text = llm.complete(
+            task="reply",
+            user="Reply with: CONNECTION OK",
             max_tokens=50,
-            messages=[{"role": "user", "content": "Reply with: CONNECTION OK"}],
         )
-        text = response.content[0].text
         if "OK" in text.upper():
             print("OK")
-            results["Claude API"] = True
+            results["LLM API"] = True
         else:
             print(f"UNEXPECTED: {text}")
-            results["Claude API"] = False
+            results["LLM API"] = False
     except Exception as e:
         print(f"FAILED — {e}")
-        results["Claude API"] = False
+        results["LLM API"] = False
 
     # 2. Telegram
     print("Testing Telegram bot...", end=" ", flush=True)

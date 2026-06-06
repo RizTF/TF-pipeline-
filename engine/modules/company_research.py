@@ -9,12 +9,9 @@ import logging
 import re
 import requests
 
-from config.settings import ANTHROPIC_API_KEY, CLAUDE_MODEL
-from anthropic import Anthropic
+from modules.llm import complete, LLMError
 
 logger = logging.getLogger("tf.research")
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 def _extract_domain(email: str) -> str:
@@ -94,12 +91,11 @@ Provide a concise summary (under 200 words) with:
 
 Be factual — only include what you can verify from the info above. If info is limited, say so briefly."""
 
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
+        return complete(
+            task="research",
+            user=prompt,
             max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
         )
-        return response.content[0].text.strip()
-    except Exception as e:
+    except LLMError as e:
         logger.error(f"Company research failed: {e}")
         return ""

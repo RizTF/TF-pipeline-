@@ -4,12 +4,10 @@ Claude API client — classifies inbound emails and generates replies.
 
 import json
 import logging
-from anthropic import Anthropic
-from config.settings import ANTHROPIC_API_KEY, CLAUDE_MODEL, CALENDLY_LINK
+from config.settings import CALENDLY_LINK
+from modules.llm import complete, extract_json, LLMError
 
 logger = logging.getLogger("tf.claude")
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 # ── Classification prompt ────────────────────────────────────────────
 
@@ -135,20 +133,14 @@ def classify_email(from_addr: str, subject: str, body: str) -> dict:
     user_msg = f"From: {from_addr}\nSubject: {subject}\n\n{body}"
 
     try:
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=500,
+        text = complete(
+            task="classify",
             system=CLASSIFY_SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
+            user=user_msg,
+            max_tokens=500,
+            json_mode=True,
         )
-        text = response.content[0].text.strip()
-        # Strip markdown code fences if present
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1]
-        if text.endswith("```"):
-            text = text.rsplit("```", 1)[0]
-        text = text.strip()
-        return json.loads(text)
+        return extract_json(text)
     except json.JSONDecodeError as e:
         logger.error(f"Claude returned invalid JSON: {e}")
         return {
@@ -186,15 +178,14 @@ def generate_reply(from_addr: str, subject: str, body: str, category: str, histo
     user_msg += f"Latest email:\n{body}\n\nWrite a reply from Paul."
 
     try:
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=800,
+        return complete(
+            task="reply",
             system=REPLY_SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
+            user=user_msg,
+            max_tokens=800,
         )
-        return response.content[0].text.strip()
-    except Exception as e:
-        logger.error(f"Claude API error generating reply: {e}")
+    except LLMError as e:
+        logger.error(f"LLM error generating reply: {e}")
         return ""
 
 
@@ -221,15 +212,14 @@ def generate_objection_reply(
     user_msg += f"Their latest email:\n{body}\n\nWrite a warm, persuasive objection-handling reply from Paul."
 
     try:
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=600,
+        return complete(
+            task="objection",
             system=OBJECTION_SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
+            user=user_msg,
+            max_tokens=600,
         )
-        return response.content[0].text.strip()
-    except Exception as e:
-        logger.error(f"Claude API error generating objection reply: {e}")
+    except LLMError as e:
+        logger.error(f"LLM error generating objection reply: {e}")
         return ""
 
 
@@ -248,15 +238,14 @@ def generate_draft(from_addr: str, subject: str, body: str, summary: str, histor
     user_msg += f"Latest email:\n{body}\n\nWrite a thoughtful draft reply from Paul. Riz will review before sending."
 
     try:
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=800,
+        return complete(
+            task="draft",
             system=REPLY_SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
+            user=user_msg,
+            max_tokens=800,
         )
-        return response.content[0].text.strip()
-    except Exception as e:
-        logger.error(f"Claude API error generating draft: {e}")
+    except LLMError as e:
+        logger.error(f"LLM error generating draft: {e}")
         return ""
 
 
@@ -271,13 +260,12 @@ def generate_precall_brief(from_addr: str, subject: str, body: str) -> str:
     )
 
     try:
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=600,
+        return complete(
+            task="brief",
             system=BRIEF_SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
+            user=user_msg,
+            max_tokens=600,
         )
-        return response.content[0].text.strip()
-    except Exception as e:
-        logger.error(f"Claude API error generating brief: {e}")
+    except LLMError as e:
+        logger.error(f"LLM error generating brief: {e}")
         return ""

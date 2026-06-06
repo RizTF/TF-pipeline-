@@ -24,9 +24,33 @@ def _optional(key: str, default: str = "") -> str:
     return os.getenv(key, default).strip()
 
 
-# --- Anthropic ---
+# --- AI / LLM providers ---
+# Anthropic is the primary provider. Other providers are optional and act as
+# cheaper routes and/or automatic backups if Anthropic is unavailable.
+# See modules/llm.py for the provider-agnostic routing + failover layer.
 ANTHROPIC_API_KEY = _require("ANTHROPIC_API_KEY")
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
+
+# Primary model. Defaults to the current Claude Sonnet (closes the migration
+# off the deprecated claude-sonnet-4-20250514 snapshot).
+LLM_MODEL = _optional("LLM_MODEL", "claude-sonnet-4-6")
+# Cheaper/faster model, available for cost-saving task routes (see .env.example).
+LLM_MODEL_FAST = _optional("LLM_MODEL_FAST", "claude-haiku-4-5-20251001")
+
+# Backwards-compatible alias — older code may still import CLAUDE_MODEL.
+CLAUDE_MODEL = LLM_MODEL
+
+# Optional OpenAI-compatible provider (OpenAI, OpenRouter, Groq, DeepSeek,
+# Together, Google OpenAI-compat, or a local Ollama/LM Studio server). Leave
+# OPENAI_API_KEY blank to disable — the engine then runs Anthropic-only.
+OPENAI_API_KEY = _optional("OPENAI_API_KEY")
+OPENAI_BASE_URL = _optional("OPENAI_BASE_URL")  # blank = api.openai.com
+OPENAI_MODEL = _optional("OPENAI_MODEL", "gpt-4o")
+OPENAI_MODEL_FAST = _optional("OPENAI_MODEL_FAST", "gpt-4o-mini")
+
+# Per-call timeout (seconds) so a hung provider fails fast to the backup,
+# and how many times to retry a transient error before failing over.
+LLM_TIMEOUT = float(_optional("LLM_TIMEOUT", "30"))
+LLM_MAX_RETRIES = int(_optional("LLM_MAX_RETRIES", "2"))
 
 # --- Email ---
 SMTP_SERVER = _optional("SMTP_SERVER", "smtp.office365.com")

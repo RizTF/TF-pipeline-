@@ -67,7 +67,7 @@ AI-powered email reply engine that automatically handles inbound replies to Paul
 **Repo:** github.com/RizTF/TF-pipeline-
 **Branch:** claude/enhance-tfpipeline-site-PY81w
 **App directory on VPS:** /home/talentfinder/app/
-**Model:** claude-sonnet-4-20250514 (DEPRECATED — migrate to claude-sonnet-4-6)
+**Model:** claude-sonnet-4-6 (primary). AI calls run through a provider-agnostic routing + failover layer (modules/llm.py) — switch models/providers and add backups (e.g. OpenAI / OpenRouter) via .env, no code changes. See engine/MODEL_ROUTING.md.
 
 ### Architecture
 ```
@@ -137,7 +137,8 @@ telegram_handler.py (cron every 2 mins)
 | inbox_watcher.py | Main pipeline — reads queue, classifies, takes action |
 | telegram_handler.py | Two-way Telegram control |
 | webhook_server.py | HTTP server on port 5111 |
-| modules/claude_client.py | All Claude prompts (classify, reply, objection, draft, brief) |
+| modules/llm.py | Provider-agnostic AI layer — per-task model routing + automatic failover (Anthropic primary, OpenAI/compatible backup) |
+| modules/claude_client.py | All AI prompts (classify, reply, objection, draft, brief) — calls modules/llm.py |
 | modules/conversation_store.py | Email threading — stores history per sender |
 | modules/company_research.py | Real-time company scraping for objection handling |
 | modules/imap_client.py | SMTP sending + webhook queue reader |
