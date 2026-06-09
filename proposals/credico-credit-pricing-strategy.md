@@ -1,131 +1,102 @@
-# CREDICO — ADVERTISING CREDIT PRICING STRATEGY (INTERNAL)
+# CREDICO — MULTI-BOARD CREDIT PRICING (INTERNAL)
 
 **Prepared for:** Riz
-**Re:** Alicia Harris / Credico — volume job-advertising deal (~800 credits/year)
+**Re:** Alicia Harris / Credico — volume job-advertising deal
 **Date:** 8 June 2026
-**Status:** Internal working doc — NOT for client. Pricing floors based on supplier cost cards.
+**Status:** Internal working doc — NOT for client. Built from supplier cost cards. Markup: +30%.
 
 ---
 
-## 1. THE DECISION: BUNDLED PER-CREDIT, NOT PER-BOARD
+## 1. THE MODEL: COMPONENT BUILD-UP, ONE BUNDLED CREDIT
 
-**Recommendation: sell ONE blended "TF advertising credit", volume-tiered. Deliver each
-advert on whichever board is cheapest/best (Reed-led). Never itemise by board.**
+A TalentFinder credit is a **4-board bundle**. The client sees one price; we build it up
+component-by-component and only mark up two of the four boards.
 
-The supplier cost cards make this decision for us — the three boards have incompatible
-economics, and two of them break the deal if Credico ever sees them line-itemed:
+```
+Credit price = £30          (Indeed — flat client price, every tier)
+             + Reed cost × 1.30
+             + CV Library cost × 1.30
+             + £0            (Find a Job — free to us, listed as an included board,
+                              NEVER itemised or mentioned as free to the client)
+```
 
-| Board | Pricing model | Cost/credit @ 800 | Sold per-board would be |
-|-------|---------------|-------------------|-------------------------|
-| **Reed** | Per-credit | **£19.19** | £25–29 — beats Credico's current rate ✅ |
-| **Premium board (Tier A)** | Per-credit | **£35.00** | £45–52 — *above* their current £34.38 ❌ |
-| **Indeed** | Spend / CPC × 1.30 | budget-based | does not map to "credits" ❌ |
-
-**Credico's current rate: £34.38/credit** (£275 ÷ 8 standard credits).
-
-- Reed is the cost-leader but only at volume: £49.52/credit @ 50 → £19.19 @ 500+.
-- The premium board's *cost* (£35) is already above what Credico pay today — uncompetitive
-  as a standalone line. Keep it as fill-insurance, used selectively.
-- Indeed is spend-based — usually the highest-volume source for field-sales/agent roles,
-  but it cannot be expressed as a "credit."
-
-Bundling lets us: (a) hide the per-board spread (our media-buying margin), (b) deliver on
-Reed by default and dip into the premium board / Indeed only when fill requires it,
-(c) re-optimise or swap suppliers behind the scenes without renegotiating with Credico,
-(d) match exactly what Alicia asked for — "tiered options, volume-based saving."
-
-This is normal media-buying arbitrage against a defined deliverable (one managed live
-advert) — no gharar, no deception.
+- The client sees **four boards** (Indeed, CV Library, Reed, Find a Job).
+- We pay for three; Find a Job is free and pure perceived value.
+- Per-board costs and the build-up stay behind the curtain — one blended credit price only.
 
 ---
 
-## 2. RECOMMENDED TIER LADDER (CLIENT-FACING)
+## 2. SUPPLIER COSTS (per credit, by tier volume)
 
-Our cost base literally proves the "more credits = greater saving" promise: at low volume
-Reed costs more than Credico's current rate; at 800 we can beat it comfortably. Lean into it.
+| Board | 100 | 300 | 500 | 800 |
+|-------|-----|-----|-----|-----|
+| Reed (cost) | £38.23 | £24.41 | £19.19 | £19.19 |
+| CV Library (cost) | £60.00 | £50.00 | £45.00 | £35.00 |
+| Indeed (client price, flat) | £30.00 | £30.00 | £30.00 | £30.00 |
+| Find a Job (cost) | £0 | £0 | £0 | £0 |
 
-| Tier | Annual credits | **Sell £/credit** | vs current £34.38 | Margin if Reed-delivered |
-|------|----------------|-------------------|-------------------|--------------------------|
-| Standard | up to 100 | £34 | hold | protects vs Reed's high low-volume cost |
-| Growth | 101–300 | £32 | −7% | cost £24.41 → ~24% |
-| Scale | 301–500 | £29 | −16% | cost £19.19 → ~34% |
-| **Partner (Credico)** | 500–800 committed | **£29** | **−16%** | cost £19.19 → £9.81 = **34%** |
-
-Headline number to put in front of Alicia: **£29/credit on an annual 800 commitment.**
+Note: Reed gives no extra break 500→800 (£19.19 both) — push Reed for a real 800 rate.
+Indeed £30 client price assumed to carry our 30% (i.e. ~£23.08 spend → ~£6.92 profit/credit).
 
 ---
 
-## 3. THE WINNING NARRATIVE FOR ALICIA
+## 3. CLIENT PRICE @ +30% MARKUP (decided)
 
-| | Calculation | Annual |
-|---|---|---|
-| Credico today (Totaljobs equivalent) | 800 × £34.38 | **£27,504** |
-| **TF Partner offer** | 800 × £29 | **£23,200** |
-| **Credico saves** | | **£4,304 (16%)** |
-
-And our side of it:
-
-| Delivery mix | Cost/credit | Profit/credit @ £29 | Total profit @ 800 |
-|--------------|-------------|---------------------|--------------------|
-| Pure Reed | £19.19 | £9.81 | **£7,848** |
-| 75% Reed / 25% premium board | £23.14 | £5.86 | £4,688 |
-| 85% Reed / 15% premium board | £21.56 | £7.44 | £5,952 |
-
-Credico saves money, we make £5–8k on the ads alone, and the filtering add-on stacks on top.
-That is the case for moving them off Totaljobs.
+| Tier | Volume | Indeed | Reed +30% | CV Lib +30% | **Credit price** | Rounded |
+|------|--------|--------|-----------|-------------|------------------|---------|
+| Starter | 100 | £30 | £49.70 | £78.00 | £157.70 | **£158** |
+| Growth | 300 | £30 | £31.73 | £65.00 | £126.73 | **£127** |
+| Scale | 500 | £30 | £24.95 | £58.50 | £113.45 | **£113** |
+| Partner | 800 | £30 | £24.95 | £45.50 | £100.45 | **£100** |
 
 ---
 
-## 4. THREE FLAGS BEFORE SENDING
+## 4. OUR PROFIT (@ +30%)
 
-1. **500 = 800 same Reed unit cost (£19.19).** Reed gives no extra break for the jump to
-   800, so don't price the 800 tier far below 500 — we'd be discounting margin we aren't
-   getting. **Push Reed for a genuine 800-volume rate first**; if they give it, we keep the
-   upside.
-2. **Never itemise the premium board (£35–45) or Indeed CPC to Credico.** One blended credit
-   price only. The spread is the margin.
-3. **Offer Indeed as an optional "Performance Surge" line** — managed at cost + 30% — for
-   campaign launches needing fast volume. Keeps the core credit price Reed-anchored and
-   competitive while giving Alicia a turbo button. (Indeed economics: spend × 1.30, e.g.
-   £2,000 budget → £2,600 to client → £600 GP.)
+| Tier | Reed profit | CV Lib profit | Indeed profit | **Profit/credit** | At full tier volume |
+|------|-------------|---------------|---------------|-------------------|---------------------|
+| Starter (100) | £11.47 | £18.00 | ~£6.92 | ~£36.39 | ~£3,639 |
+| Growth (300) | £7.32 | £15.00 | ~£6.92 | ~£29.24 | ~£8,772 |
+| Scale (500) | £5.76 | £13.50 | ~£6.92 | ~£26.18 | ~£13,090 |
+| **Partner (800)** | £5.76 | £10.50 | ~£6.92 | **~£23.18** | **~£18,544** |
 
----
-
-## 5. AI APPLICANT FILTERING — THE ADD-ON (PRICED SEPARATELY)
-
-### What it is (from the live TF-Pipeline engine)
-The same engine currently filtering Paul's inbound email replies is, architecturally, an
-AI inbound-application filtering pipeline:
-
-1. **Ingest** — every application hits a webhook and queues automatically (24/7).
-2. **Score/classify** — Claude reads each application against the role spec and sorts it
-   (qualified / borderline / reject) with a confidence score, in seconds.
-3. **Act** — qualified → acknowledge + shortlist; borderline → flag for human review;
-   reject → polite auto-response; spam/auto-replies → binned.
-4. **Notify + log** — strong matches pushed to the hiring manager with a one-line summary;
-   every applicant written to a live dashboard (Google Sheet).
-5. **Thread memory** — keeps history per applicant so follow-ups stay in context.
-
-### Why it sells to Credico
-Field-sales/agent adverts generate huge, low-quality applicant floods. 800 credits could
-mean 10,000+ applications. The engine screens, scores and shortlists at near-zero marginal
-cost (Claude API ≈ pennies per application), saving their recruiters dozens of hours/week
-and giving applicants a fast, professional response (employer-brand win).
-
-### Pricing
-- **Recommended: +£8/credit add-on** — "every applicant screened, scored and shortlisted."
-  At 800 credits = **£6,400/yr, ~95% margin.** Stays in the per-credit language Credico
-  already think in → easy yes.
-- **Alternative:** flat managed-screening retainer (~£500–750/month) — better recurring
-  revenue, decoupled from credit count, but a bigger separate line for procurement.
-
-Lead with the per-credit add-on.
+Plus AI Applicant Filtering add-on: **+£8/credit, ~95% margin** (Claude API ≈ pennies/app).
+At 800 = +£6,400/yr. **Total Partner-tier upside ≈ £25k/yr** across ads + filtering.
 
 ---
 
-## 6. ONE-LINE SUMMARY
+## 5. THE COMMERCIAL FLAG — PRICE vs CREDICO'S CURRENT RATE
 
-Sell a single blended credit at **£29 on an 800 annual commitment** (16% below Credico's
-current rate, 34% margin on Reed), keep board allocation and the premium/Indeed costs behind
-the curtain, offer Indeed as an optional surge boost, and stack **AI Applicant Filtering at
-+£8/credit** on top. Credico save money; we make £12–14k/year across ads + filtering.
+Credico currently pay ~**£34.38/credit** (£275 ÷ 8, single board). The Multi-Board Credit is
+**3–6× that** (£100–£158). Partner tier at 800 = **£80,360/yr** vs their current ~£27,500.
+
+This is not a like-for-like — they're getting **4 boards vs 1** — but it must be **reframed as
+a reach upgrade**, not compared credit-for-credit, or Alicia will balk. Two levers:
+
+1. **Reframe the unit** (done in the client page): "Multi-Board Campaign Credit — 4 boards, one
+   posting." Sell reach, not credit count.
+2. **Verify the 800 number.** If "800 credits" was sized on single-board postings, Credico
+   likely need **far fewer** multi-board credits for the same or better reach. Worth confirming
+   with Alicia before she sees an £80k line — reframing 800 single-board → e.g. 200–300
+   multi-board credits keeps the annual spend near their current budget while improving reach.
+
+**Action:** confirm with Alicia what the 800 was counting before issuing the headline annual
+figure.
+
+---
+
+## 6. AI APPLICANT FILTERING — THE ADD-ON
+
+Same live TF-Pipeline engine, repointed at job applications: ingest → score vs role spec →
+sort (shortlist/review/decline) → auto-acknowledge → ranked shortlist to hiring managers →
+log to dashboard. Field-sales adverts at 4-board volume generate huge applicant pools — ideal
+use case. **+£8/credit, near-pure margin.**
+
+---
+
+## 7. ONE-LINE SUMMARY
+
+Bundle 4 boards into one credit (Indeed £30 + Reed×1.3 + CV Library×1.3 + free Find a Job),
+priced **£158 / £127 / £113 / £100** across the four tiers. Sell it as a **reach upgrade**, not
+a credit-count comparison, and **verify the 800-credit basis** before quoting the annual total.
+Partner-tier upside ≈ £18.5k (ads) + £6.4k (filtering) ≈ **£25k/yr**.
