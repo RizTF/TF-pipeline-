@@ -8,6 +8,8 @@
 
 ## OVERVIEW
 
+Dear Alicia,
+
 This proposal is based on a like-for-like service to what Credico currently uses through
 TalentFinder — **multi job board advertising**. Each credit covers one role, advertised across
 our job board network.
@@ -73,3 +75,10 @@ boards can be added or removed — this is just a guide.
 
 TalentFinder has been established for 10 years and has the technological infrastructure to
 support Credico's growth.
+
+---
+
+Best regards,
+
+**Riz**
+TalentFinder Ltd
