@@ -81,4 +81,4 @@ support Credico's growth.
 Best regards,
 
 **Riz**
-TalentFinder Ltd
+Talent Finder
