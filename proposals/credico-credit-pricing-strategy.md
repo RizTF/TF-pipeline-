@@ -60,43 +60,49 @@ Indeed £30 client price assumed to carry our 30% (i.e. ~£23.08 spend → ~£6.
 | Scale (500) | £5.76 | £13.50 | ~£6.92 | ~£26.18 | ~£13,090 |
 | **Partner (800)** | £5.76 | £10.50 | ~£6.92 | **~£23.18** | **~£18,544** |
 
-Plus AI Applicant Filtering add-on: **+£8/credit, ~95% margin** (Claude API ≈ pennies/app).
-At 800 = +£6,400/yr. **Total Partner-tier upside ≈ £25k/yr** across ads + filtering.
+Plus the Screening & Scheduling add-on (see §6): **£75 + VAT per role**, near-pure margin.
 
 ---
 
-## 5. THE COMMERCIAL FLAG — PRICE vs CREDICO'S CURRENT RATE
+## 5. POSITIONING — LIKE-FOR-LIKE, NOT AN UPSELL
 
-Credico currently pay ~**£34.38/credit** (£275 ÷ 8, single board). The Multi-Board Credit is
-**3–6× that** (£100–£158). Partner tier at 800 = **£80,360/yr** vs their current ~£27,500.
+The client page positions this as a **like-for-like continuation** of the multi-board
+advertising Credico already buys through TalentFinder — packaged into volume tiers with full
+ATS, account management and support behind it. We do **not** compare credit-for-credit against
+any single-board rate; it is sold as the multi-board product it is.
 
-This is not a like-for-like — they're getting **4 boards vs 1** — but it must be **reframed as
-a reach upgrade**, not compared credit-for-credit, or Alicia will balk. Two levers:
+The proposal quotes four specific volumes — **100 / 300 / 500 / 800 credits** — as a guide.
+Everything tailors once we know Credico's real requirements; boards can be added/removed.
+Push Reed for a genuine 800 rate (they charge the same £19.19 at 500 and 800) before locking
+the 800 quote.
 
-1. **Reframe the unit** (done in the client page): "Multi-Board Campaign Credit — 4 boards, one
-   posting." Sell reach, not credit count.
-2. **Verify the 800 number.** If "800 credits" was sized on single-board postings, Credico
-   likely need **far fewer** multi-board credits for the same or better reach. Worth confirming
-   with Alicia before she sees an £80k line — reframing 800 single-board → e.g. 200–300
-   multi-board credits keeps the annual spend near their current budget while improving reach.
+### Quoted totals (client-facing, + VAT)
 
-**Action:** confirm with Alicia what the 800 was counting before issuing the headline annual
-figure.
+| Volume | Price/credit | **Total** |
+|--------|--------------|-----------|
+| 100 credits | £158 | £15,800 |
+| 300 credits | £127 | £38,100 |
+| 500 credits | £113 | £56,500 |
+| 800 credits | £100 | £80,000 |
 
 ---
 
-## 6. AI APPLICANT FILTERING — THE ADD-ON
+## 6. ADD-ON: AUTOMATED SCREENING & INTERVIEW SCHEDULING
 
-Same live TF-Pipeline engine, repointed at job applications: ingest → score vs role spec →
-sort (shortlist/review/decline) → auto-acknowledge → ranked shortlist to hiring managers →
-log to dashboard. Field-sales adverts at 4-board volume generate huge applicant pools — ideal
-use case. **+£8/credit, near-pure margin.**
+**£75 + VAT per role.** Every applicant auto-screened against the role criteria; interviews
+auto-scheduled around each hiring manager's availability. Built on the live TF-Pipeline engine
+(ingest → score vs spec → sort → notify) plus calendar scheduling. Marginal cost ≈ pennies per
+applicant + scheduling, so **£75/role is near-pure margin**. Positioned to Credico as a
+**staffing-cost reducer** (removes hours of manual sift + coordination per role). At 800 roles
+fully opted in = **+£60,000/yr** potential.
 
 ---
 
 ## 7. ONE-LINE SUMMARY
 
-Bundle 4 boards into one credit (Indeed £30 + Reed×1.3 + CV Library×1.3 + free Find a Job),
-priced **£158 / £127 / £113 / £100** across the four tiers. Sell it as a **reach upgrade**, not
-a credit-count comparison, and **verify the 800-credit basis** before quoting the annual total.
-Partner-tier upside ≈ £18.5k (ads) + £6.4k (filtering) ≈ **£25k/yr**.
+Bundle the boards into one credit (Indeed £30 + Reed×1.3 + CV Library×1.3 + free Find a Job),
+priced **£158 / £127 / £113 / £100** and quoted at **100 / 300 / 500 / 800 credits**
+(£15,800 / £38,100 / £56,500 / £80,000 + VAT). Positioned as a **like-for-like multi-board
+service** with full ATS, account management, support and salary advice included. Add
+**Automated Screening & Interview Scheduling at £75 + VAT/role**. Everything tailors once we
+know Credico's real volumes — the proposal is a guide.
